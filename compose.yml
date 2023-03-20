@@ -1,0 +1,22 @@
+services:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: pg_isready -U postgres -d postgres
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports: 
+      - 5432:5432  
+  migrate:
+    build: ./migrations
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    environment:
+      - DB_URI=postgres://postgres:postgres@database:5432/postgres?sslmode=disable
