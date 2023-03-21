@@ -9,8 +9,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    ports: 
-      - 5432:5432  
+    ports:
+      - 5432:5432
   migrate:
     build: ./migrations
     depends_on:
@@ -20,3 +20,13 @@ services:
       - ./migrations:/migrations
     environment:
       - DB_URI=postgres://postgres:postgres@database:5432/postgres?sslmode=disable
+  pgweb:
+    restart: always
+    image: sosedoff/pgweb
+    ports:
+      - 8081:8081
+    environment:
+      - PGWEB_DATABASE_URL=postgres://postgres:postgres@database:5432/postgres?sslmode=disable
+    depends_on:
+      database:
+        condition: service_healthy
