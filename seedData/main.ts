@@ -3,10 +3,6 @@ import { City } from './city.js'
 import { Friendship } from './friendship.js'
 import { Person } from './person.js'
 import client from './setup_db.js'
-import Client from './setup_db.js'
-
-const res = await Client.query('SELECT $1::text as message', ['Hello world!'])
-console.log(res.rows[0].message)
 
 // generate 10 cities
 let cities: City[] = []
@@ -59,3 +55,5 @@ people.forEach((person, ind) => {
 friendships.forEach(async (friendship) => {
     await client.query("INSERT INTO friendship (u1, u2) VALUES ($1, $2), ($2, $1) ON CONFLICT DO NOTHING", [friendship.u1.uuid, friendship.u2.uuid])
 })
+
+console.log("Finished seeding data")
