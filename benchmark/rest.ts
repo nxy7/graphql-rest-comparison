@@ -1,60 +1,34 @@
-import client from "./setup_db.js";
+import { benchmark } from "./benchmark.js";
+import { FetchType } from "./fetch.js";
+import getUsers from "./getUserIds.js";
 
-let ids = (await client.query("select id from user_profile")).rows.slice(0, 50)
+let ids = await getUsers()
 
-let byteSize = 0
-await benchmark(async () => {
-  await Promise.all(ids.map(async (id, ind) => {
-    let res = await makeRequest("http://localhost:3001/userWithFriends/" + id.id)
-    // if (ind == 0)
-      // console.log(res)
+console.log("Specialized endpoint")
+// specialized endpoint should not be run more than once, because backend resolves it mostly in a single
+// db query and database optimizes it heavily so subsequent calls to the endpoint get much smaller request
+// times, which has nothing to do with REST protocol. Naive implementation consists of multiple queries so
+// database is not able to optimize it the same way, so results are not affected by it.
+await benchmark(async (makeRequest) => {
+  await Promise.all(ids.map(async (id) => {
+    await makeRequest(new Request("http://localhost:3001/friendsCities/" + id.id), {})
   }))
-})
-byteSize = 0
-await benchmark(async () => {
-  console.log("Bechmarking ")
+}, 1)
+
+console.log("Naive implementation")
+await benchmark(async (makeRequest) => {
   await Promise.all(ids.map(async (id, ind) => {
-    let user = await makeRequest("http://localhost:3001/user/" + id.id)
-    let userFriends = await makeRequest("http://localhost:3001/userFriends/" + id.id)
-    let friends: any[] = []
-    
+    let userFriends = await makeRequest(new Request("http://localhost:3001/userFriends/" + id.id), {})
+
     await Promise.all(userFriends.map(async (f: any) => {
-      let friendData = await makeRequest("http://localhost:3001/user/" + f.u2)      
-      friends.push(friendData)
+      let friendData = await makeRequest(new Request("http://localhost:3001/user/" + f.u2), {})
+      let city = await makeRequest(new Request("http://localhost:3001/city/" + friendData.city), {})
     }))
-    user.friends = friends
   }))
-})
+}, 10)
+
+async function naive(customFetch: FetchType) {
 
 
-
-async function friendsDetails(res: any, deepLevel: number) {
-  if (deepLevel <= 0) {
-    return
-  }
-  res.friends = await Promise.all(res.friends.map(async (f: any) => {
-    return await makeRequest("http://localhost:3001/user/" + f)
-  }))
-
-  await Promise.all(res.friends.map(async (f: any) => friendsDetails(f, deepLevel - 1)))
 }
 
-async function benchmark(func: () => any) {
-  let start = Date.now()
-  await func()
-
-  let end = Date.now()
-  let time = (end-start)/1000
-  console.log("Results:")
-  console.log("Time: ", time, "s")
-  console.log("Requests per second:", 1000/time)
-  console.log("Byte size: ", byteSize)
-  console.log("Size in MB: ", byteSize / 1000000)
-
-}
-async function makeRequest(add: string) {
-  let res = await fetch(add)
-  let blob = await res.blob()
-  byteSize += blob.size
-  return (await blob.json())
-}

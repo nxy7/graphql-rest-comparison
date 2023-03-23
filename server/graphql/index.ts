@@ -1,7 +1,7 @@
 import type { Express } from "express";
+import { handler } from "./schema.js";
+
 
 export function setupGraphqlRoutes(app: Express) {
-    app.get('/graphql', (req, res) => {
-        res.send("hello graphql")
-    })
+    app.post('/graphql', handler)
 }

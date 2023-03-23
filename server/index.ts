@@ -9,5 +9,5 @@ setupRestRoutes(app)
 setupGraphqlRoutes(app)
 
 app.listen(port, () => {
-    console.log("App startup")
+    console.log("Server listening on port: " + port)
 })
