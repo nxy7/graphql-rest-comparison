@@ -4,16 +4,6 @@ import getUsers from "./getUserIds.js";
 
 let ids = await getUsers()
 
-console.log("Specialized endpoint")
-// specialized endpoint should not be run more than once, because backend resolves it mostly in a single
-// db query and database optimizes it heavily so subsequent calls to the endpoint get much smaller request
-// times, which has nothing to do with REST protocol. Naive implementation consists of multiple queries so
-// database is not able to optimize it the same way, so results are not affected by it.
-await benchmark(async (makeRequest) => {
-  await Promise.all(ids.map(async (id) => {
-    await makeRequest(new Request("http://localhost:3001/friendsCities/" + id.id), {})
-  }))
-}, 1)
 
 console.log("Naive implementation")
 await benchmark(async (makeRequest) => {
@@ -25,10 +15,17 @@ await benchmark(async (makeRequest) => {
       let city = await makeRequest(new Request("http://localhost:3001/city/" + friendData.city), {})
     }))
   }))
-}, 10)
-
-async function naive(customFetch: FetchType) {
+}, 1)
 
 
-}
+console.log("Specialized endpoint")
+// specialized endpoint should not be run more than once, because backend resolves it mostly in a single
+// db query and database optimizes it heavily so subsequent calls to the endpoint get much smaller request
+// times, which has nothing to do with REST protocol. Naive implementation consists of multiple queries so
+// database is not able to optimize it the same way, so results are not affected by it.
+await benchmark(async (makeRequest) => {
+  await Promise.all(ids.map(async (id) => {
+    await makeRequest(new Request("http://localhost:3001/friendsCities/" + id.id), {})
+  }))
+}, 1)
 

@@ -1,17 +1,6 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLNonNull, GraphQLList } from 'graphql';
 import { createHandler } from 'graphql-http/lib/use/express';
 import client from '../setup_db.js';
-import DataLoader from 'dataloader';
-
-const cityLoader = new DataLoader(async (keys) => {
-    const cities = (await client.query("select * from city where id = ANY($1)", [keys])).rows
-    const orderedCities = keys.map((key) => {
-        return cities.find(city => city.id == key) || new Error(`No results for ${key}`)
-    })
-    // console.log(cities, orderedCities)
-    console.log("Cities loaded")
-    return orderedCities
-})
 
 const city = new GraphQLObjectType({
     name: "City",
@@ -31,7 +20,7 @@ const user: any = new GraphQLObjectType({
             city: {
                 type: city,
                 resolve: async (obj) => {
-                    const city = await cityLoader.load(obj.city)
+                    const city = await (client.query("select * from city where id = $1", [obj.city]))
                     return city
                 }
             },
@@ -68,4 +57,4 @@ const schema = new GraphQLSchema({
     }),
 });
 
-export const optimizedHandler = createHandler({ schema })
+export const naiveHandler= createHandler({ schema })

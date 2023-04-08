@@ -1,13 +1,15 @@
 # graphql-rest-comparison
+Repository made to compare graphql and rest. 
 
 ## Prerequisites
-- bun
+- nix installed
 - docker
 
 ## How to run the project
-Repository made to compare graphql and rest. 
-To run the project you run
-`docker compose up -d`
+The easiest way to run the project is runnning `nix develop .` which sets up whole environment
+and then running `./run_benchmarks.sh` script which spins up necesarry containers, starts server and runs tests. 
+
+To manually run the project use `docker compose up -d` command
 then open two terminals. Start server in one `cd server && bun install && bun run index.ts`
 and run benchmarks in the other one `cd benchmark; bun install && bun run rest.ts && bun run graphql.ts`
 
