@@ -31,6 +31,7 @@ await benchmark(async (makeReq) => {
         })
     }))
 }, 1)
+
 console.log("GraphQL Optimised Implementation")
 await benchmark(async (makeReq) => {
     await Promise.all(ids.map(async (id) => {

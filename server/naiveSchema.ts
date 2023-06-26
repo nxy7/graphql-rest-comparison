@@ -1,6 +1,6 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLNonNull, GraphQLList } from 'graphql';
 import { createHandler } from 'graphql-http/lib/use/express';
-import client from '../setup_db.js';
+import client from './setup_db.js';
 
 const city = new GraphQLObjectType({
     name: "City",

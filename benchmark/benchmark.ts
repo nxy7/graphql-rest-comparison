@@ -40,10 +40,11 @@ export async function benchmark(
     averageMBSize /= 1000000
 
     console.log("Results:")
-    console.log(repeatCount, " runs")
-    console.log("Average time: ", averageTime, "s")
+    // console.log(repeatCount, " runs")
+    console.log("Time: ", averageTime, "s")
     console.log("Avg Requests per second:", 1000 / averageTime)
     console.log("Size in MB: ", averageMBSize)
+    console.log("________________________")
 
 }
 
